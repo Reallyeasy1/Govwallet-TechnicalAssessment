@@ -19,3 +19,16 @@ export const fetchAllRedemptions = async (): Promise<RedemptionStatus[]> => {
   }
   return response.json();
 };
+
+export const addRedemption = async (teamName: string): Promise<{ message: string }> => {
+  const response = await fetch(`http://localhost:3000/api/redemption/${teamName}/redeem`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to add redemption: ${response.statusText}`);
+  }
+  return response.json();
+};

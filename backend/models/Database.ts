@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { RedemptionModel } from "./RedemptionModel";
 
 interface StaffData {
   staffPassId: string;
@@ -9,10 +10,12 @@ interface StaffData {
 export class Database {
   private static instance: Database;
   private staffData: StaffData[] = [];
+  private redemptionModel: RedemptionModel;
 
   private constructor() {
     this.loadStaffData();
     this.initializeRedemptionData();
+    this.redemptionModel = RedemptionModel.getInstance(path.resolve(__dirname, "../data/redemption-data.csv"));
   }
 
   public static getInstance(): Database {
@@ -74,6 +77,10 @@ export class Database {
     } catch (error) {
       console.error("Error creating redemption-data.csv:", error);
     }
+  }
+
+  public getRedemptionModel(): RedemptionModel {
+    return this.redemptionModel;
   }
 
   public getTeamByStaffId(staffPassId: string): string | undefined {

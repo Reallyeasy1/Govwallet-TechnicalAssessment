@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { RedemptionModel } from "../models/RedemptionModel";
+import { Database } from "../models/Database";
 
-const redemptionModel = RedemptionModel.getInstance();
+const redemptionModel = Database.getInstance().getRedemptionModel();
 
 export const checkTeamRedemption = (req: Request, res: Response): Response => {
   const { teamName } = req.params;
@@ -14,6 +14,7 @@ export const checkTeamRedemption = (req: Request, res: Response): Response => {
       message: `Team name '${teamName}' does not exist in the redemption records.`,
     });
   }
+
   const hasRedeemed = redemptionModel.hasTeamRedeemed(teamName);
   return res.status(200).json({
     teamName,
@@ -28,7 +29,15 @@ export const getAllRedemptions = (req: Request, res: Response): Response => {
 };
 
 export const addRedemption = (req: Request, res: Response): Response => {
-  const { teamName } = req.body;
+  const { teamName } = req.params;
+
+  if (!teamName) {
+    return res.status(400).json({
+      error: "Missing team name",
+      message: "The 'teamName' field is required.",
+    });
+  }
+
   try {
     redemptionModel.validateTeamName(teamName);
   } catch (error) {
@@ -37,6 +46,15 @@ export const addRedemption = (req: Request, res: Response): Response => {
       message: `Team name '${teamName}' does not exist in the redemption records.`,
     });
   }
-  const result = redemptionModel.addRedemption(teamName);
-  return res.status(200).json({ message: result });
+
+  try {
+    const result = redemptionModel.addRedemption(teamName);
+    return res.status(200).json({ message: result });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Redemption failed",
+      message: "An error occurred while processing the redemption request.",
+      details: error instanceof Error ? error.message : String(error),
+    });
+  }
 };

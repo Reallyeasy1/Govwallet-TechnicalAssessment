@@ -5,14 +5,27 @@ import path from "path";
 describe("RedemptionModel (CSV Reader) Tests", () => {
   let redemptionModel: RedemptionModel;
   let originalData: any;
+  const testFilePath = path.resolve(__dirname, "../data/redemption-data-test.csv");
 
   beforeAll(() => {
-    redemptionModel = Object.create(RedemptionModel.getInstance());
+    // Create a new RedemptionModel instance with test file path
+    redemptionModel = RedemptionModel.getInstance(testFilePath);
+
+    if (!fs.existsSync(testFilePath)) {
+      fs.writeFileSync(testFilePath, "teamName,redeemedAt\n");
+    }
+
     originalData = [...redemptionModel.getAllRedemptionData()];
   });
 
   afterEach(() => {
     redemptionModel["redemptionData"] = [...originalData];
+  });
+
+  afterAll(() => {
+    if (fs.existsSync(testFilePath)) {
+      fs.unlinkSync(testFilePath);
+    }
   });
 
   test("Should load all redemption records from CSV", () => {
@@ -51,7 +64,7 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
 
   test("addRedemption should append a new record if team has not redeemed", () => {
     const result = redemptionModel.addRedemption("GRYFFINDOR");
-    expect(result).toBe("Redemption recorded. Data will be saved on exit.");
+    expect(result).toBe("Redemption recorded.");
     expect(redemptionModel.hasTeamRedeemed("GRYFFINDOR")).toBe(true);
   });
 });

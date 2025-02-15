@@ -21,14 +21,13 @@ export class RedemptionData {
 export class RedemptionModel {
   private static instance: RedemptionModel;
   private redemptionData: RedemptionData[] = [];
-  private filePath = path.resolve(__dirname, "../data/redemption-data.csv");
   private isShutdownHookAdded = false;
 
-  private constructor() {}
+  private constructor(private filePath: string) {}
 
-  public static getInstance(): RedemptionModel {
+  public static getInstance(filePath: string): RedemptionModel {
     if (!RedemptionModel.instance) {
-      RedemptionModel.instance = new RedemptionModel();
+      RedemptionModel.instance = new RedemptionModel(filePath);
       RedemptionModel.instance.loadRedemptionData();
       RedemptionModel.instance.setupShutdownHook();
     }
@@ -108,13 +107,12 @@ export class RedemptionModel {
 
     const newRecord = new RedemptionData(teamName, Date.now().toString());
     if (existingIndex !== -1) {
-      // Replace the old record with the new record
       this.redemptionData[existingIndex] = newRecord;
-      return "Redemption recorded. Data will be saved on exit.";
+    } else {
+      this.redemptionData.push(newRecord);
     }
-    console.log("Pushing redeemedAt", newRecord.redeemedAt);
-    this.redemptionData.push(newRecord);
-    return "Redemption recorded. Data will be saved on exit.";
+    this.saveRedemptionData();
+    return "Redemption recorded.";
   }
 
   public getAllRedemptionData(): RedemptionData[] {
