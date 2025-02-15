@@ -43,7 +43,11 @@ export class RedemptionModel {
       const csvData = fs.readFileSync(this.filePath, "utf-8").split("\n");
       const headers = csvData.shift()?.split(",") || [];
       const teamIndex = headers.indexOf("teamName");
-      const dateIndex = headers.indexOf("redeemedAt");
+      var dateIndex = headers.indexOf("redeemedAt");
+
+      if (dateIndex === -1) {
+        dateIndex = headers.indexOf("redeemedAt\r");
+      }
 
       if (teamIndex === -1 || dateIndex === -1) {
         console.error("Redemption CSV file is missing required headers.");

@@ -13,7 +13,6 @@
 
 ```bash
 git clone https://github.com/Reallyeasy1/Govwallet-TechnicalAssessment.git
-
 cd Govwallet-TechnicalAssessment
 ```
 
