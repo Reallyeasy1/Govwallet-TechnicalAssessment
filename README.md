@@ -5,7 +5,7 @@
 ## **Prerequisites**
 
 - **Node.js** (version 16 or higher)
-- **npm** (comes with Node.js) or **yarn**
+- **npm** (comes with Node.js)
 - **Git** (for version control)
 - **VSCode** (recommended for development)
 
@@ -39,7 +39,11 @@ npm install
 
 ## 2.1 Typescript installation
 
-Also ensure that you have installed typescript on both the frontend and backend directories. The installation guide can be found here https://www.typescriptlang.org/download/.
+Also ensure that you have installed typescript on both the frontend and backend directories by running the following command.
+
+```bash
+npm install typescript --save-dev
+```
 
 ## **3. Start the Development Servers**
 
