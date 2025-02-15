@@ -10,12 +10,14 @@ export class Database {
   private static instance: Database;
   private staffData: StaffData[] = [];
 
-  private constructor() {}
+  private constructor() {
+    this.loadStaffData();
+    this.initializeRedemptionData();
+  }
 
   public static getInstance(): Database {
     if (!Database.instance) {
       Database.instance = new Database();
-      Database.instance.loadStaffData();
     }
     return Database.instance;
   }
@@ -50,6 +52,27 @@ export class Database {
       console.log(`Loaded ${this.staffData.length} staff records from CSV.`);
     } catch (error) {
       console.error("Error loading staff data from CSV:", error);
+    }
+  }
+
+  private initializeRedemptionData(): void {
+    const redemptionFilePath = path.resolve(__dirname, "../data/redemption-data.csv");
+
+    if (fs.existsSync(redemptionFilePath)) {
+      console.log("Redemption data file already exists.");
+      return;
+    }
+
+    try {
+      const uniqueTeams = Array.from(new Set(this.staffData.map((staff) => staff.teamName)));
+
+      const csvHeader = "teamName,redeemedAt\n";
+      const csvContent = uniqueTeams.map((team) => `${team},\n`).join("");
+
+      fs.writeFileSync(redemptionFilePath, csvHeader + csvContent);
+      console.log(`Created redemption-data.csv with ${uniqueTeams.length} unique teams.`);
+    } catch (error) {
+      console.error("Error creating redemption-data.csv:", error);
     }
   }
 
