@@ -1,7 +1,6 @@
 export interface RedemptionStatus {
   teamName: string;
-  canRedeem: boolean;
-  message: string;
+  redeemedAt: string;
 }
 
 export const fetchRedemptionStatus = async (teamName: string): Promise<RedemptionStatus> => {

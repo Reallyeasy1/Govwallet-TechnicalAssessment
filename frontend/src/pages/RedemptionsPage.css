@@ -1,0 +1,120 @@
+.redemption-page {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 700px;
+  margin: 50px auto;
+  background-color: #eef2f7;
+  border-radius: 15px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.redemption-page:hover {
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.redemption-page h1 {
+  font-size: 2.2rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.redemption-page h1::before {
+  content: "🎁";
+  font-size: 2.4rem;
+}
+
+.search-input {
+  padding: 12px;
+  width: 100%;
+  max-width: 450px;
+  margin: 25px 0;
+  font-size: 15px;
+  border-radius: 25px;
+  border: 1px solid #b0bec5;
+  transition: border-color 0.3s;
+  background-color: #ffffff;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1f3a93;
+  box-shadow: 0 0 8px rgba(31, 58, 147, 0.4);
+}
+
+.redemption-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.redemption-table th,
+.redemption-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+  font-size: 14px;
+}
+
+.redemption-table th {
+  background-color: #4b0082;
+  color: white;
+  font-weight: bold;
+}
+
+.redemption-table tr:nth-child(even) {
+  background-color: #f7f7f7;
+}
+
+.redemption-table tr:hover {
+  background-color: #e1eaf5;
+  transition: background-color 0.3s ease;
+}
+
+.add-message,
+.error-message {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 6px;
+}
+
+.add-message {
+  background-color: #e0f7e9;
+  color: #2e7d32;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.redeem-button {
+  background-color: #800080;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s;
+}
+
+.redeem-button:hover {
+  background-color: #9932cc;
+  transform: translateY(-2px);
+}
+
+.redeem-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
