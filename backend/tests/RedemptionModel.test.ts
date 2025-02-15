@@ -39,7 +39,7 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
   });
 
   test("Should check if redemption-data.csv exists", () => {
-    const filePath = path.resolve(__dirname, "../data/redemption-data.csv");
+    const filePath = path.resolve(__dirname, "../data/redemption-data-test.csv");
     expect(fs.existsSync(filePath)).toBe(true);
   });
 
@@ -49,7 +49,7 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
   });
 
   test("Should contain headers teamName and redeemedAt", () => {
-    const filePath = path.resolve(__dirname, "../data/redemption-data.csv");
+    const filePath = path.resolve(__dirname, "../data/redemption-data-test.csv");
     const csvContent = fs.readFileSync(filePath, "utf-8");
     const headers = csvContent.split("\n")[0];
     expect(headers).toBe("teamName,redeemedAt");

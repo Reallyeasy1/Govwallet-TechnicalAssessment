@@ -21,6 +21,7 @@ export function RedemptionsPage() {
         teamName: teamName.toUpperCase(),
         redeemedAt: redeemedAt ? new Date(parseInt(redeemedAt)).toLocaleString() : "Not Redeemed",
       }));
+      console.log(formattedData);
       setRedemptions(formattedData);
     } catch (err) {
       setError((err as Error).message);
