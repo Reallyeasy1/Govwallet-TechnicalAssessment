@@ -4,9 +4,15 @@ import path from "path";
 
 describe("RedemptionModel (CSV Reader) Tests", () => {
   let redemptionModel: RedemptionModel;
+  let originalData: any;
 
   beforeAll(() => {
     redemptionModel = RedemptionModel.getInstance();
+    originalData = [...redemptionModel.getAllRedemptionData()];
+  });
+
+  afterEach(() => {
+    redemptionModel["redemptionData"] = [...originalData];
   });
 
   test("Should load all redemption records from CSV", () => {
@@ -49,5 +55,22 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
     redemptionModel["redemptionData"] = [];
     expect(redemptionModel.getAllRedemptionData().length).toBe(0);
     redemptionModel["redemptionData"] = originalData;
+  });
+
+  test("addRedemption should append a new record if team has not redeemed", () => {
+    const result = redemptionModel.addRedemption("EligibleTeam");
+    expect(result).toBe("Redemption successful.");
+    expect(redemptionModel.hasTeamRedeemed("EligibleTeam")).toBe(true);
+  });
+
+  test("addRedemption should not add record if team has already redeemed", () => {
+    redemptionModel["redemptionData"].push({ teamName: "DuplicateTeam", redeemedAt: "1234567890" });
+    const result = redemptionModel.addRedemption("DuplicateTeam");
+    expect(result).toBe("This team has already redeemed their gift.");
+  });
+
+  test("addRedemption should not mutate original redemptionData directly", () => {
+    redemptionModel.addRedemption("TestNoMutation");
+    expect(redemptionModel.getAllRedemptionData()).not.toEqual(originalData);
   });
 });
