@@ -12,25 +12,19 @@ export function StaffList({ staffList }: StaffListProps) {
 
   React.useEffect(() => {
     const fetchStatuses = async () => {
-      const statuses: [string, string][] = [];
-
       try {
         const allRedemptions = await fetchAllRedemptions();
-
-        for (const { teamName, redeemedAt } of allRedemptions) {
-          if (!statuses.find(([team]) => team === teamName)) {
-            statuses.push([teamName, redeemedAt ?? "Not redeemed"]);
-          }
-        }
-
-        const statusRecord = Object.fromEntries(statuses);
-        console.log("Status List:", statusRecord);
+        const statuses = allRedemptions.map(({ teamName, redeemedAt }) => ({
+          teamName: teamName.toUpperCase(),
+          redeemedAt: redeemedAt ? new Date(Number(redeemedAt)).toLocaleString() : "Not Redeemed",
+        }));
+        const statusRecord = Object.fromEntries(statuses.map(({ teamName, redeemedAt }) => [teamName, redeemedAt]));
+        console.log("Formatted Redemption Statuses:", statusRecord);
         setRedemptionStatuses(statusRecord);
       } catch (error) {
-        console.error("Failed to fetch all redemptions:", error);
+        console.error("Failed to fetch redemption statuses:", error);
       }
     };
-
     fetchStatuses();
   }, [staffList]);
 
