@@ -2,15 +2,27 @@ import fs from "fs";
 import path from "path";
 import { TeamNameNotFound } from "../errors/teamNameNotFound";
 
-interface RedemptionData {
-  teamName: string;
-  redeemedAt: string;
+export class RedemptionData {
+  constructor(public teamName: string, public redeemedAt: string | null = null) {}
+
+  public hasRedeemed(): boolean {
+    return this.redeemedAt !== null && this.redeemedAt.length > 0;
+  }
+
+  public static fromCsvRow(row: string[], teamIndex: number, dateIndex: number): RedemptionData {
+    return new RedemptionData(row[teamIndex].trim(), row[dateIndex]?.trim() || null);
+  }
+
+  public toCsvRow(): string {
+    return `${this.teamName},${this.redeemedAt ?? ""}`;
+  }
 }
 
 export class RedemptionModel {
   private static instance: RedemptionModel;
   private redemptionData: RedemptionData[] = [];
   private filePath = path.resolve(__dirname, "../data/redemption-data.csv");
+  private isShutdownHookAdded = false;
 
   private constructor() {}
 
@@ -18,6 +30,7 @@ export class RedemptionModel {
     if (!RedemptionModel.instance) {
       RedemptionModel.instance = new RedemptionModel();
       RedemptionModel.instance.loadRedemptionData();
+      RedemptionModel.instance.setupShutdownHook();
     }
     return RedemptionModel.instance;
   }
@@ -27,7 +40,6 @@ export class RedemptionModel {
       console.warn("Redemption CSV file not found. Initializing an empty redemption dataset.");
       return;
     }
-
     try {
       const csvData = fs.readFileSync(this.filePath, "utf-8").split("\n");
       const headers = csvData.shift()?.split(",") || [];
@@ -42,15 +54,37 @@ export class RedemptionModel {
       this.redemptionData = csvData
         .map((line) => line.split(","))
         .filter((row) => row.length > 1)
-        .map((row) => ({
-          teamName: row[teamIndex].trim(),
-          redeemedAt: row[dateIndex].trim(),
-        }));
+        .map((row) => RedemptionData.fromCsvRow(row, teamIndex, dateIndex));
 
       console.log(`Loaded ${this.redemptionData.length} redemption records from CSV.`);
     } catch (error) {
       console.error("Error loading redemption data from CSV:", error);
     }
+  }
+
+  private saveRedemptionData(): void {
+    const csvContent = ["teamName,redeemedAt", ...this.redemptionData.map((record) => record.toCsvRow())].join("\n");
+
+    try {
+      fs.writeFileSync(this.filePath, csvContent);
+      console.log("Redemption data saved successfully.");
+    } catch (error) {
+      console.error("Error saving redemption data:", error);
+    }
+  }
+
+  private setupShutdownHook(): void {
+    if (this.isShutdownHookAdded) return;
+    process.on("exit", () => this.saveRedemptionData());
+    process.on("SIGINT", () => {
+      this.saveRedemptionData();
+      process.exit();
+    });
+    process.on("SIGTERM", () => {
+      this.saveRedemptionData();
+      process.exit();
+    });
+    this.isShutdownHookAdded = true;
   }
 
   public validateTeamName(teamName: string): void {
@@ -61,8 +95,8 @@ export class RedemptionModel {
   }
 
   public hasTeamRedeemed(teamName: string): boolean {
-    const normalizedTeamName = teamName.trim().toLowerCase();
-    return this.redemptionData.some((record) => record.teamName.toLowerCase() === normalizedTeamName);
+    const record = this.redemptionData.find((record) => record.teamName.toLowerCase() === teamName.toLowerCase());
+    return record !== undefined && record.hasRedeemed();
   }
 
   public addRedemption(teamName: string): string {
@@ -70,22 +104,20 @@ export class RedemptionModel {
       return "This team has already redeemed their gift.";
     }
 
-    const newRecord: RedemptionData = {
-      teamName,
-      redeemedAt: Date.now().toString(),
-    };
-    this.redemptionData.push(newRecord);
+    const existingIndex = this.redemptionData.findIndex((record) => record.teamName.toLowerCase() === teamName.toLowerCase());
 
-    try {
-      fs.appendFileSync(this.filePath, `\n${newRecord.teamName},${newRecord.redeemedAt}`);
-      return "Redemption successful.";
-    } catch (error) {
-      console.error("Error saving redemption record:", error);
-      return "Failed to save redemption record.";
+    const newRecord = new RedemptionData(teamName, Date.now().toString());
+    if (existingIndex !== -1) {
+      // Replace the old record with the new record
+      this.redemptionData[existingIndex] = newRecord;
+      return "Redemption recorded. Data will be saved on exit.";
     }
+    console.log("Pushing redeemedAt", newRecord.redeemedAt);
+    this.redemptionData.push(newRecord);
+    return "Redemption recorded. Data will be saved on exit.";
   }
 
   public getAllRedemptionData(): RedemptionData[] {
-    return this.redemptionData;
+    return [...this.redemptionData];
   }
 }

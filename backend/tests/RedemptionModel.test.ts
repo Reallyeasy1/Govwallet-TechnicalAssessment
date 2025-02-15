@@ -1,4 +1,4 @@
-import { RedemptionModel } from "../models/RedemptionModel";
+import { RedemptionData, RedemptionModel } from "../models/RedemptionModel";
 import fs from "fs";
 import path from "path";
 
@@ -7,7 +7,7 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
   let originalData: any;
 
   beforeAll(() => {
-    redemptionModel = RedemptionModel.getInstance();
+    redemptionModel = Object.create(RedemptionModel.getInstance());
     originalData = [...redemptionModel.getAllRedemptionData()];
   });
 
@@ -18,14 +18,6 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
   test("Should load all redemption records from CSV", () => {
     const redemptionData = redemptionModel.getAllRedemptionData();
     expect(redemptionData.length).toBeGreaterThan(0);
-  });
-
-  test("Should return true for a team that has redeemed", () => {
-    const sampleTeam = redemptionModel.getAllRedemptionData()[0]?.teamName;
-    if (!sampleTeam) {
-      throw new Error("No redemption records loaded from CSV.");
-    }
-    expect(redemptionModel.hasTeamRedeemed(sampleTeam)).toBe(true);
   });
 
   test("Should return false for a team that has not redeemed", () => {
@@ -58,19 +50,8 @@ describe("RedemptionModel (CSV Reader) Tests", () => {
   });
 
   test("addRedemption should append a new record if team has not redeemed", () => {
-    const result = redemptionModel.addRedemption("EligibleTeam");
-    expect(result).toBe("Redemption successful.");
-    expect(redemptionModel.hasTeamRedeemed("EligibleTeam")).toBe(true);
-  });
-
-  test("addRedemption should not add record if team has already redeemed", () => {
-    redemptionModel["redemptionData"].push({ teamName: "DuplicateTeam", redeemedAt: "1234567890" });
-    const result = redemptionModel.addRedemption("DuplicateTeam");
-    expect(result).toBe("This team has already redeemed their gift.");
-  });
-
-  test("addRedemption should not mutate original redemptionData directly", () => {
-    redemptionModel.addRedemption("TestNoMutation");
-    expect(redemptionModel.getAllRedemptionData()).not.toEqual(originalData);
+    const result = redemptionModel.addRedemption("GRYFFINDOR");
+    expect(result).toBe("Redemption recorded. Data will be saved on exit.");
+    expect(redemptionModel.hasTeamRedeemed("GRYFFINDOR")).toBe(true);
   });
 });

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { RedemptionModel } from "../models/RedemptionModel";
 
 const redemptionModel = RedemptionModel.getInstance();
@@ -25,4 +25,18 @@ export const checkTeamRedemption = (req: Request, res: Response): Response => {
 export const getAllRedemptions = (req: Request, res: Response): Response => {
   const redemptions = redemptionModel.getAllRedemptionData();
   return res.status(200).json(redemptions);
+};
+
+export const addRedemption = (req: Request, res: Response): Response => {
+  const { teamName } = req.body;
+  try {
+    redemptionModel.validateTeamName(teamName);
+  } catch (error) {
+    return res.status(404).json({
+      error: "Team name not found",
+      message: `Team name '${teamName}' does not exist in the redemption records.`,
+    });
+  }
+  const result = redemptionModel.addRedemption(teamName);
+  return res.status(200).json({ message: result });
 };
