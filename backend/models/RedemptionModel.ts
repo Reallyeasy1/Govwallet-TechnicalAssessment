@@ -10,6 +10,7 @@ interface RedemptionData {
 export class RedemptionModel {
   private static instance: RedemptionModel;
   private redemptionData: RedemptionData[] = [];
+  private filePath = path.resolve(__dirname, "../data/redemption-data.csv");
 
   private constructor() {}
 
@@ -22,15 +23,13 @@ export class RedemptionModel {
   }
 
   private loadRedemptionData(): void {
-    const filePath = path.resolve(__dirname, "../data/redemption-data.csv");
-
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(this.filePath)) {
       console.warn("Redemption CSV file not found. Initializing an empty redemption dataset.");
       return;
     }
 
     try {
-      const csvData = fs.readFileSync(filePath, "utf-8").split("\n");
+      const csvData = fs.readFileSync(this.filePath, "utf-8").split("\n");
       const headers = csvData.shift()?.split(",") || [];
       const teamIndex = headers.indexOf("teamName");
       const dateIndex = headers.indexOf("redeemedAt");
@@ -64,6 +63,26 @@ export class RedemptionModel {
   public hasTeamRedeemed(teamName: string): boolean {
     const normalizedTeamName = teamName.trim().toLowerCase();
     return this.redemptionData.some((record) => record.teamName.toLowerCase() === normalizedTeamName);
+  }
+
+  public addRedemption(teamName: string): string {
+    if (this.hasTeamRedeemed(teamName)) {
+      return "This team has already redeemed their gift.";
+    }
+
+    const newRecord: RedemptionData = {
+      teamName,
+      redeemedAt: Date.now().toString(),
+    };
+    this.redemptionData.push(newRecord);
+
+    try {
+      fs.appendFileSync(this.filePath, `\n${newRecord.teamName},${newRecord.redeemedAt}`);
+      return "Redemption successful.";
+    } catch (error) {
+      console.error("Error saving redemption record:", error);
+      return "Failed to save redemption record.";
+    }
   }
 
   public getAllRedemptionData(): RedemptionData[] {
