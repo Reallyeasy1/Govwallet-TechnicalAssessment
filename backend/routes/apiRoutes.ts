@@ -1,11 +1,12 @@
 import express from "express";
 import staffRoutes from "./staffRoutes";
+import redemptionRoutes from "./redemptionRoutes";
 
 const router = express.Router();
 
 router.use("/staff", staffRoutes);
+router.use("/redemption", redemptionRoutes);
 
-// Placeholder for additional routes (e.g., redemption)
 router.get("/", (_req, res) => {
   res.send("Welcome to GovWallet API");
 });

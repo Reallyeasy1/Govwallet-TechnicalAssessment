@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { getAllStaff, getStaffById, searchStaffByTeam } from "../controllers/staffController";
+import { checkTeamRedemption, getAllRedemptions } from "../controllers/redemptionController";
 
 const router = express.Router();
 
