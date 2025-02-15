@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import * as xlsx from "xlsx";
 
 interface StaffData {
   staffPassId: string;
@@ -22,28 +21,42 @@ export class Database {
   }
 
   private loadStaffData(): void {
-    const filePath = path.join(__dirname, "../data/staff-id-to-team-mapping-long.xlsx");
+    const filePath = path.resolve(__dirname, "../data/staff-id-to-team-mapping-long.csv");
 
     if (!fs.existsSync(filePath)) {
-      console.error("Excel file not found at path:", filePath);
+      console.error("CSV file not found at path:", filePath);
       return;
     }
 
     try {
-      const workbook = xlsx.readFile(filePath);
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
+      const csvData = fs.readFileSync(filePath, "utf-8").split("\n");
+      const headers = csvData.shift()?.split(",") || [];
+      const idIndex = headers.indexOf("staff_pass_id");
+      const teamIndex = headers.indexOf("team_name");
 
-      const jsonData: any[] = xlsx.utils.sheet_to_json(sheet);
-      this.staffData = jsonData.map((row) => ({
-        staffPassId: String(row["staff_pass_id"]),
-        teamName: String(row["team_name"]),
-      }));
+      if (idIndex === -1 || teamIndex === -1) {
+        console.error("CSV file missing required headers.");
+        return;
+      }
 
-      console.log(`Loaded ${this.staffData.length} staff records from Excel.`);
+      this.staffData = csvData
+        .map((line) => line.split(","))
+        .filter((row) => row.length > 1)
+        .map((row) => ({
+          staffPassId: row[idIndex].trim(),
+          teamName: row[teamIndex].trim(),
+        }));
+
+      console.log(`Loaded ${this.staffData.length} staff records from CSV.`);
     } catch (error) {
-      console.error("Error loading staff data from Excel:", error);
+      console.error("Error loading staff data from CSV:", error);
     }
+  }
+
+  public getTeamByStaffId(staffPassId: string): string | undefined {
+    const normalizedId = staffPassId.trim().toLowerCase();
+    const staff = this.staffData.find((s) => s.staffPassId.toLowerCase() === normalizedId);
+    return staff?.teamName;
   }
 
   public getAllStaffData(): StaffData[] {
