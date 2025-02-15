@@ -37,6 +37,10 @@ cd frontend
 npm install
 ```
 
+## 2.1 Typescript installation
+
+Also ensure that you have installed typescript on both the frontend and backend directories. The installation guide can be found here https://www.typescriptlang.org/download/.
+
 ## **3. Start the Development Servers**
 
 ## Via Command Prompt 1
